@@ -15,12 +15,14 @@ public class MongoInitializer {
     @PostConstruct
     public void init() {
         mongoTemplate.createCollection("chat");
-
-        // @Tailable은 buffer size를 늘려야 동작함
+        increaseBufferSize("chat", 8_192)
+    }
+    
+    // @Tailable works only when the buffer size is increased
+    private void increaseBufferSize(String collection, int bufferSize) {
         Document command = new Document();
-        command.put("convertToCapped", "chat");
-        command.put("size", 100_000);
-
+        command.put("convertToCapped", collection);
+        command.put("size", bufferSize);
         mongoTemplate.executeCommand(command);
     }
 }
